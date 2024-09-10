@@ -5,6 +5,23 @@ import pyautogui
 import keyboard
 import time
 import random
+from configparser import ConfigParser
+
+config = ConfigParser()
+config.read('config.ini')
+
+max_interval = config.get('Speed', 'max_interval').split('#')[0].strip()
+min_interval = config.get('Speed', 'min_interval').split('#')[0].strip()
+
+char_interval = config.get('Speed', 'char_interval').split('#')[0].strip()
+
+try:
+    max_interval = float(max_interval)
+    min_interval = float(min_interval)
+    char_interval = float(char_interval)
+except ValueError as e:
+    print(f"Error converting values to float: {e}")
+    exit(1)
 
 def get_text_to_type(driver):
     time.sleep(1)
@@ -24,11 +41,11 @@ def get_text_to_type(driver):
         print("text to type: ", text)
     return text
 
-def type_text(text, min=0.01, max=0.015):
+def type_text(text):
     words = text.split()
     for word in words:
-        pyautogui.typewrite(word + ' ',interval=0.04)
-        time.sleep(random.uniform(min,max))
+        pyautogui.typewrite(word + ' ',interval=char_interval)
+        time.sleep(random.uniform(min_interval, max_interval))
 
 def main():
     done = True
