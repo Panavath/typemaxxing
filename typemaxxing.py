@@ -4,19 +4,29 @@ import sys
 def install_package(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
-try:
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    from bs4 import BeautifulSoup
-    import pyautogui
-    import keyboard
-    import time
-    import random
-    from configparser import ConfigParser
-except ImportError as e:
-    missing_package = str(e).split("'")[1]
-    print(f"{missing_package} is not installed. Installing...")
-    install_package(missing_package)
+required_packages = [
+    'selenium',
+    'bs4',
+    'pyautogui',
+    'keyboard',
+    'configparser'
+]
+
+for package in required_packages:
+    try:
+        __import__(package)  # Try to import the package
+    except ImportError:
+        print(f"{package} is not installed. Installing...")
+        install_package(package)
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup
+import pyautogui
+import keyboard
+import time
+import random
+from configparser import ConfigParser
 
 config = ConfigParser()
 config.read('config.ini')
