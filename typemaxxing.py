@@ -4,6 +4,7 @@ import sys
 def install_package(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
+# List of required packages
 required_packages = [
     'selenium',
     'bs4',
@@ -12,21 +13,23 @@ required_packages = [
     'configparser'
 ]
 
+# Ensure all required packages are installed
 for package in required_packages:
     try:
-        __import__(package)  # Try to import the package
+        __import__(package)
     except ImportError:
         print(f"{package} is not installed. Installing...")
         install_package(package)
 
+# Now import all modules after ensuring they are installed
+import pyautogui
+import keyboard
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
-import pyautogui
-import keyboard
+from configparser import ConfigParser
 import time
 import random
-from configparser import ConfigParser
 
 config = ConfigParser()
 config.read('config.ini')
@@ -43,6 +46,14 @@ except ValueError as e:
     print(f"Error converting values to float: {e}")
     exit(1)
 
+stop_typing = False
+
+def stop_typing_keybind():
+    global stop_typing
+    stop_typing = True
+
+keyboard.add_hotkey("ctrl+alt+s", stop_typing_keybind)
+
 def get_text_to_type(driver):
     time.sleep(1)
     src = driver.page_source
@@ -58,30 +69,33 @@ def get_text_to_type(driver):
         print("No text found")
         return None
     else:
-        print("text to type: ", text)
+        print("Text to type: ", text)
     return text
 
 def type_text(text):
+    global stop_typing
     words = text.split()
+    stop_typing = False
     for word in words:
+        if stop_typing:
+            break
         pyautogui.typewrite(word + ' ', interval=char_interval)
         time.sleep(random.uniform(min_interval, max_interval))
 
 def main():
-    done = True
+    print("*** Close this window to stop the program.")
     chrome_options = Options()
     chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
     driver.get("https://play.typeracer.com/")
 
-    while done:
-        keyboard.wait("ctrl+alt+t")
+    while True:
+            keyboard.wait("ctrl+alt+t")
 
-        text_to_type = get_text_to_type(driver)
-        done = False
-        if text_to_type:
-            type_text(text_to_type)
+            text_to_type = get_text_to_type(driver)
+            
+            if text_to_type:
+                type_text(text_to_type)
 
-        done = True
-
-main()
+if __name__ == "__main__":
+    main()
