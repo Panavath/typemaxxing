@@ -1,18 +1,28 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-import pyautogui
-import keyboard
-import time
-import random
-from configparser import ConfigParser
+import subprocess
+import sys
+
+def install_package(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from bs4 import BeautifulSoup
+    import pyautogui
+    import keyboard
+    import time
+    import random
+    from configparser import ConfigParser
+except ImportError as e:
+    missing_package = str(e).split("'")[1]
+    print(f"{missing_package} is not installed. Installing...")
+    install_package(missing_package)
 
 config = ConfigParser()
 config.read('config.ini')
 
 max_interval = config.get('Speed', 'max_interval').split('#')[0].strip()
 min_interval = config.get('Speed', 'min_interval').split('#')[0].strip()
-
 char_interval = config.get('Speed', 'char_interval').split('#')[0].strip()
 
 try:
@@ -44,7 +54,7 @@ def get_text_to_type(driver):
 def type_text(text):
     words = text.split()
     for word in words:
-        pyautogui.typewrite(word + ' ',interval=char_interval)
+        pyautogui.typewrite(word + ' ', interval=char_interval)
         time.sleep(random.uniform(min_interval, max_interval))
 
 def main():
